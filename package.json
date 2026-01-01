@@ -1,0 +1,33 @@
+{
+    "name": "cypress-sentinel",
+    "version": "1.0.0",
+    "description": "Automated Testing Suite with Cypress - Functional, Performance, and Security Testing",
+    "main": "index.js",
+    "scripts": {
+        "cy:open": "cypress open",
+        "cy:run": "cypress run",
+        "cy:functional": "cypress run --spec 'cypress/e2e/functional/**/*.cy.js'",
+        "cy:performance": "cypress run --spec 'cypress/e2e/performance/**/*.cy.js'",
+        "cy:security": "cypress run --spec 'cypress/e2e/security/**/*.cy.js'",
+        "cy:all": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
+        "report:generate": "npx mochawesome-merge cypress/reports/json/*.json > cypress/reports/merged-report.json && npx marge cypress/reports/merged-report.json -f report -o cypress/reports/html"
+    },
+    "keywords": [
+        "cypress",
+        "testing",
+        "automation",
+        "qa",
+        "e2e"
+    ],
+    "author": "QA DevOps Engineer",
+    "license": "MIT",
+    "devDependencies": {
+        "cypress": "^13.6.2",
+        "cypress-mochawesome-reporter": "^3.8.1",
+        "cypress-audit": "^1.1.0",
+        "lighthouse": "^11.4.0",
+        "mochawesome": "^7.1.3",
+        "mochawesome-merge": "^4.3.0",
+        "mochawesome-report-generator": "^6.2.0"
+    }
+}
