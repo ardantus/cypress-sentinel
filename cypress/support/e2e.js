@@ -16,9 +16,6 @@
 // Import Cypress Mochawesome Reporter
 import 'cypress-mochawesome-reporter/register';
 
-// Import Cypress Audit untuk Lighthouse
-import 'cypress-audit/commands';
-
 // Custom commands
 Cypress.Commands.add('takeNamedScreenshot', (name) => {
     cy.screenshot(name, {

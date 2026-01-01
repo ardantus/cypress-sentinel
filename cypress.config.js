@@ -1,5 +1,4 @@
 const { defineConfig } = require('cypress');
-const { lighthouse, prepareAudit } = require('cypress-audit');
 
 module.exports = defineConfig({
     e2e: {
@@ -48,24 +47,8 @@ module.exports = defineConfig({
             // Mochawesome reporter plugin
             require('cypress-mochawesome-reporter/plugin')(on);
 
-            // Lighthouse & Audit plugin untuk performance testing
-            on('before:browser:launch', (browser = {}, launchOptions) => {
-                prepareAudit(launchOptions);
-
-                // Chrome-specific settings untuk headless mode
-                if (browser.name === 'chrome' && browser.isHeadless) {
-                    launchOptions.args.push('--disable-gpu');
-                    launchOptions.args.push('--no-sandbox');
-                    launchOptions.args.push('--disable-dev-shm-usage');
-                }
-
-                return launchOptions;
-            });
-
+            // Custom task untuk logging
             on('task', {
-                lighthouse: lighthouse(),
-
-                // Custom task untuk logging
                 log(message) {
                     console.log(message);
                     return null;

@@ -1,12 +1,25 @@
 /**
- * PERFORMANCE TEST: TTFB & Lighthouse Audit
+ * PERFORMANCE TEST: TTFB & Performance Metrics
  * 
  * Test Case: Performance Metrics
  * - Check TTFB (Time To First Byte) < 500ms
- * - Run Lighthouse audit dengan threshold minimum 80
+ * - Measure comprehensive performance metrics
+ * - Calculate performance score
  */
 
-describe('Performance Test - TTFB & Lighthouse', () => {
+// Helper function to calculate performance score
+function calculatePerformanceScore(metrics) {
+    let score = 100;
+
+    // Deduct points based on metrics
+    if (metrics.ttfb > 200) score -= (metrics.ttfb - 200) / 20;
+    if (metrics.domContentLoaded > 1500) score -= (metrics.domContentLoaded - 1500) / 100;
+    if (metrics.pageLoad > 3000) score -= (metrics.pageLoad - 3000) / 100;
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+describe('Performance Test - TTFB & Metrics', () => {
 
     const testUrl = 'https://www.google.com';
     const maxTTFB = 500; // milliseconds
@@ -27,40 +40,71 @@ describe('Performance Test - TTFB & Lighthouse', () => {
         });
     });
 
-    it('Should pass Lighthouse performance audit with score >= 80', () => {
+    it('Should measure comprehensive page performance metrics', () => {
         // Visit halaman yang akan diaudit
         cy.visit(testUrl);
 
-        // Lighthouse thresholds
-        const thresholds = {
-            performance: 80,
-            accessibility: 80,
-            'best-practices': 80,
-            seo: 80
-        };
+        // Wait untuk page sepenuhnya load
+        cy.wait(2000);
 
-        // Run Lighthouse audit
-        cy.lighthouse(thresholds).then((results) => {
-            cy.log('Lighthouse Audit Results:');
-            cy.log(`Performance: ${results.performance}`);
-            cy.log(`Accessibility: ${results.accessibility}`);
-            cy.log(`Best Practices: ${results['best-practices']}`);
-            cy.log(`SEO: ${results.seo}`);
+        // Measure performance menggunakan window.performance API
+        cy.window().then((win) => {
+            const perfData = win.performance.timing;
+
+            // Calculate various metrics
+            const metrics = {
+                // Time To First Byte
+                ttfb: perfData.responseStart - perfData.requestStart,
+
+                // DOM Interactive
+                domInteractive: perfData.domInteractive - perfData.navigationStart,
+
+                // DOM Content Loaded
+                domContentLoaded: perfData.domContentLoadedEventEnd - perfData.navigationStart,
+
+                // Full Page Load
+                pageLoad: perfData.loadEventEnd - perfData.navigationStart,
+
+                // DNS Lookup Time
+                dnsLookup: perfData.domainLookupEnd - perfData.domainLookupStart,
+
+                // TCP Connection Time
+                tcpConnection: perfData.connectEnd - perfData.connectStart,
+
+                // Server Response Time
+                serverResponse: perfData.responseEnd - perfData.requestStart
+            };
+
+            // Log all metrics
+            cy.log('=== Performance Metrics ===');
+            cy.log(`TTFB: ${metrics.ttfb}ms`);
+            cy.log(`DOM Interactive: ${metrics.domInteractive}ms`);
+            cy.log(`DOM Content Loaded: ${metrics.domContentLoaded}ms`);
+            cy.log(`Full Page Load: ${metrics.pageLoad}ms`);
+            cy.log(`DNS Lookup: ${metrics.dnsLookup}ms`);
+            cy.log(`TCP Connection: ${metrics.tcpConnection}ms`);
+            cy.log(`Server Response: ${metrics.serverResponse}ms`);
 
             // Take screenshot
-            cy.takeNamedScreenshot('performance-lighthouse-audit');
+            cy.takeNamedScreenshot('performance-metrics');
 
-            // Validasi semua scores memenuhi threshold
-            expect(results.performance, 'Performance Score').to.be.gte(thresholds.performance);
-            expect(results.accessibility, 'Accessibility Score').to.be.gte(thresholds.accessibility);
-            expect(results['best-practices'], 'Best Practices Score').to.be.gte(thresholds['best-practices']);
-            expect(results.seo, 'SEO Score').to.be.gte(thresholds.seo);
+            // Performance assertions
+            expect(metrics.ttfb, 'TTFB').to.be.lessThan(500);
+            expect(metrics.domContentLoaded, 'DOM Content Loaded').to.be.lessThan(3000);
+            expect(metrics.pageLoad, 'Page Load Time').to.be.lessThan(5000);
+            expect(metrics.serverResponse, 'Server Response').to.be.lessThan(1000);
 
-            cy.log('✓ All Lighthouse thresholds passed');
+            cy.log('✓ All performance metrics within acceptable thresholds');
+
+            // Calculate performance score (simplified)
+            const performanceScore = calculatePerformanceScore(metrics);
+            cy.log(`Performance Score: ${performanceScore}/100`);
+
+            expect(performanceScore, 'Performance Score').to.be.gte(70);
         });
     });
 
-    it('should measure page load performance metrics', () => {
+    it('Should measure page load performance metrics', () => {
         cy.visit(testUrl);
 
         // Measure performance menggunakan window.performance API

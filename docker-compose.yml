@@ -1,8 +1,11 @@
-version: '3.8'
+
+
 
 services:
   cypress:
-    image: cypress/included:13.6.2
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: cypress-sentinel
     working_dir: /e2e
     
@@ -19,23 +22,17 @@ services:
       - CYPRESS_video=false
       - CYPRESS_screenshotOnRunFailure=true
     
-    # Volume mounting untuk edit lokal dan akses report
+    # Volume mounting untuk edit test files dan akses report
     volumes:
-      - ./cypress:/e2e/cypress
-      - ./cypress.config.js:/e2e/cypress.config.js
-      - ./package.json:/e2e/package.json
+      - ./cypress/e2e:/e2e/cypress/e2e
       - ./reports:/e2e/reports
-      # node_modules menggunakan named volume agar npm install berfungsi
-      - cypress_node_modules:/e2e/node_modules
     
     # Command untuk menjalankan test dalam headless Chrome
     command: >
       sh -c "
-        echo '=== Installing Dependencies ===' &&
-        npm install &&
         echo '=== Running Cypress Tests ===' &&
-        echo 'SPEC_PATTERN: ${SPEC_PATTERN:-cypress/e2e/**/*.cy.js}' &&
-        npx cypress run --browser chrome --headless --spec '${SPEC_PATTERN:-cypress/e2e/**/*.cy.js}' &&
+        echo 'SPEC_PATTERN: $${SPEC_PATTERN:-cypress/e2e/**/*.cy.js}' &&
+        npx cypress run --browser chrome --headless --spec '$${SPEC_PATTERN:-cypress/e2e/**/*.cy.js}' &&
         echo '=== Tests Completed ===' &&
         echo 'Report available at: reports/'
       "
@@ -54,6 +51,3 @@ services:
 networks:
   cypress-network:
     driver: bridge
-
-volumes:
-  cypress_node_modules:
